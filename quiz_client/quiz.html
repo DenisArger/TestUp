@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Тест</title>
+<link rel="stylesheet" href="css/quiz.css">
+</head>
+<body>
+<div class="container">
+  <div id="screen-loading">Загрузка...</div>
+  <div id="screen-name" class="hidden">
+    <h1 id="quiz-title"></h1>
+    <p id="quiz-desc"></p>
+    <input id="name" placeholder="Имя Фамилия">
+    <p id="limit-msg" class="wrong hidden"></p>
+    <button id="start-btn" style="margin-top:1rem">Начать</button>
+  </div>
+  <div id="screen-quiz" class="hidden">
+    <div class="timer" id="timer"></div>
+    <div id="question"></div>
+    <button id="next-btn" style="margin-top:1rem">Далее</button>
+  </div>
+  <div id="screen-result" class="hidden">
+    <h1>Результат</h1>
+    <p id="score"></p>
+    <div id="breakdown"></div>
+  </div>
+</div>
+<script src="js/api.js"></script>
+<script src="js/quiz.js"></script>
+</body>
+</html>
