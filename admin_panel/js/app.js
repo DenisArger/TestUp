@@ -11,7 +11,7 @@ window.app = {
         this.bindAdd();
     },
 
-    showTab: function (tab) {
+    showTab: async function (tab) {
         document.querySelectorAll('.tab-view').forEach(v => v.style.display = 'none');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         const view = document.getElementById(`${tab}-view`);
