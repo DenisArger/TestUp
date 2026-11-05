@@ -1,0 +1,14 @@
+# PocketBase runtime
+pocketbase
+pb_data/*.db
+pb_data/*.db-shm
+pb_data/*.db-wal
+pb_data/storage/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
