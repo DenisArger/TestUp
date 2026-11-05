@@ -117,10 +117,15 @@ function showResult(score){
     else { correct = (ua||[]).slice().sort().join(',') === (Array.isArray(q.correct_answer)?q.correct_answer:[]).slice().sort().join(','); }
     const div = document.createElement('div');
     div.className = 'result-item ' + (correct?'correct':'wrong');
-    div.textContent = `${i+1}. ${q.text} — ${correct?'верно':'неверно'}`;
+    let extra = '';
+    if (quiz.show_answers !== false) {
+      if (q.type === 'text') extra = ` (правильный: ${q.correct_answer})`;
+      else if (Array.isArray(q.options)) extra = ` (правильный: ${(Array.isArray(q.correct_answer)?q.correct_answer:[q.correct_answer]).map(i=>q.options[i]).join(', ')})`;
+    }
+    div.textContent = `${i+1}. ${q.text} — ${correct?'верно':'неверно'}${extra}`;
     bd.appendChild(div);
   });
-  if (quiz.show_answers === false) bd.classList.add('hidden');
+  bd.classList.remove('hidden');
 }
 
 init();

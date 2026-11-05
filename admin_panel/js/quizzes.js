@@ -21,6 +21,7 @@ function renderQuizzes() {
             <td>${created}</td>
             <td class="actions">
                 <button class="btn btn-sm btn-primary" onclick="window.quizzes.editQuiz('${q.id}')">Редактировать</button>
+                <button class="btn btn-sm btn-success" onclick="window.quizzes.shareQuiz('${q.id}')">Поделиться</button>
                 <button class="btn btn-sm btn-danger" onclick="window.quizzes.deleteQuiz('${q.id}', '${escapeHtml(q.title)}')">Удалить</button>
             </td>
         `;
@@ -58,6 +59,17 @@ async function updateQuiz(id, data) {
     return updated;
 }
 
+function shareQuiz(id) {
+    const url = `${location.protocol}//${location.hostname}:8083/quiz.html?id=${id}`;
+    if (navigator.clipboard) { navigator.clipboard.writeText(url); }
+    prompt('Ссылка на тест (скопирована):', url);
+}
+
+function editQuiz(id) {
+    const q = quizzes.find(x=>x.id===id);
+    if (q) openQuizModal(q);
+}
+
 async function deleteQuiz(id) {
     await apiDelete(`/collections/quizzes/records/${id}`);
     quizzes = quizzes.filter(q => q.id !== id);
@@ -80,6 +92,17 @@ async function openQuizModal(existing) {
             <div class="form-group">
                 <label>Описание</label>
                 <textarea name="description" rows="3">${escapeHtml(existing ? existing.description || '' : '')}</textarea>
+            </div>
+            <div class="form-group">
+                <label>Лимит попыток (0 = без лимита)</label>
+                <input type="number" name="attempts_limit" value="${existing ? (existing.attempts_limit||0) : 1}" min="0">
+            </div>
+            <div class="form-group">
+                <label>Лимит времени, сек (0 = без лимита)</label>
+                <input type="number" name="time_limit" value="${existing ? (existing.time_limit||0) : 0}" min="0">
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" name="show_answers" ${existing && existing.show_answers !== false ? 'checked' : 'checked'}> Показывать ответы</label>
             </div>
             <div class="form-group">
                 <label><input type="checkbox" name="active" ${existing && existing.active ? 'checked' : ''}> Активен</label>
@@ -114,6 +137,9 @@ async function openQuizModal(existing) {
             title: fd.get('title'),
             description: fd.get('description'),
             active: fd.get('active') === 'on',
+            attempts_limit: Number(fd.get('attempts_limit')||0),
+            time_limit: Number(fd.get('time_limit')||0),
+            show_answers: fd.get('show_answers') === 'on',
         };
         try {
             if (isEdit) {
@@ -142,6 +168,8 @@ window.quizzes = {
     createQuiz,
     updateQuiz,
     deleteQuiz,
+    editQuiz,
+    shareQuiz,
     openQuizModal,
     getQuizzes: () => quizzes,
 };
