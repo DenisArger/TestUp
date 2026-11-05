@@ -19,12 +19,12 @@ function renderAttempts() {
         const pct = a.total ? Math.round((a.score / a.total) * 100) : 0;
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${escapeHtml(a.tg_id)}</td>
-            <td>${quizName}</td>
+            <td>${escapeHtml(a.respondent_name || '—')}</td>
             <td>${a.score}</td>
             <td>${a.total}</td>
             <td>${pct}%</td>
-            <td>${formatDate(a.created)}</td>
+            <td>${formatDate(a.started_at)}</td>
+            <td>${formatDate(a.finished_at)}</td>
         `;
         tbody.appendChild(tr);
     }

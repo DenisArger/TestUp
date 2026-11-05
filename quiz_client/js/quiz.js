@@ -84,7 +84,7 @@ async function submit(){
     if (q.type === 'text') {
       correct = String(ua||'').trim().toLowerCase() === String(q.correct_answer||'').trim().toLowerCase();
     } else if (q.type === 'single') {
-      correct = ua === q.correct_answer;
+      correct = String(ua) === String(q.correct_answer);
     } else {
       const uaArr = (ua||[]).slice().sort().join(',');
       const caArr = (Array.isArray(q.correct_answer)?q.correct_answer:[]).slice().sort().join(',');
@@ -113,7 +113,7 @@ function showResult(score){
     const ua = answers[q.id];
     let correct = false;
     if (q.type==='text') correct = String(ua||'').trim().toLowerCase()===String(q.correct_answer||'').trim().toLowerCase();
-    else if (q.type==='single') correct = ua===q.correct_answer;
+    else if (q.type==='single') correct = String(ua)===String(q.correct_answer);
     else { correct = (ua||[]).slice().sort().join(',') === (Array.isArray(q.correct_answer)?q.correct_answer:[]).slice().sort().join(','); }
     const div = document.createElement('div');
     div.className = 'result-item ' + (correct?'correct':'wrong');

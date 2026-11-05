@@ -5,6 +5,8 @@ window.app = {
         window.quizzes.renderQuizzes();
         window.questions.loadQuizSelect();
         window.attempts.loadAttemptQuizSelect();
+        await window.attempts.loadAttempts(null);
+        window.attempts.renderAttempts();
         this.bindNav();
         this.bindAdd();
     },
@@ -59,6 +61,9 @@ window.app = {
                 await window.attempts.loadAttempts(id || null);
                 window.attempts.renderAttempts();
             };
+            await window.attempts.loadAttempts(null);
+            window.attempts.renderAttempts();
+            window.attempts.loadAttemptQuizSelect();
         }
     },
 
