@@ -2,7 +2,14 @@ meta:
   environment: docker
   toolchain:
     name: docker
-    version: latest
+build:
+  dockerfile: Dockerfile
+  skip: false
 run:
-  containerPort: 8080
+  image: null
+  command: null
+  args: null
   persistenceMount: /app/pb_data
+  containerPort: 8080
+  singleton: true
+  zeroDowntime: false
