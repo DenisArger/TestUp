@@ -1,10 +1,10 @@
 # Версию PocketBase уточните на github.com/pocketbase/pocketbase/releases
 ARG PB_VERSION=0.40.6
 
-FROM python:3.11-slim
+FROM debian:bookworm-slim
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends nginx curl ca-certificates unzip \
+    && apt-get install -y --no-install-recommends python3 nginx curl ca-certificates unzip \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
