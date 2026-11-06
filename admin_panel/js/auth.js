@@ -1,4 +1,4 @@
-const LOGIN_URL = '/collections/_superusers/auth-with-password';
+const LOGIN_URL = '/api/admins/auth-with-password';
 
 let currentAdmin = null;
 
