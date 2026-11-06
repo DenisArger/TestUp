@@ -9,6 +9,7 @@ window.app = {
         window.attempts.renderAttempts();
         this.bindNav();
         this.bindAdd();
+        if (window.quizzes.bindImport) window.quizzes.bindImport();
     },
 
     showTab: async function (tab) {
@@ -23,7 +24,8 @@ window.app = {
         const labels = { quizzes: 'Тесты', questions: 'Вопросы', attempts: 'Результаты' };
         if (title) title.textContent = labels[tab] || tab;
 
-        const btnAdd = document.getElementById('btn-add');
+        const btnImport = document.getElementById('btn-import-quiz');
+        if (btnImport) btnImport.style.display = (tab === 'quizzes') ? 'inline-block' : 'none';
         if (tab === 'quizzes') {
             btnAdd.style.display = 'inline-block';
             btnAdd.textContent = '+ Добавить тест';

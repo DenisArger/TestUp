@@ -90,3 +90,29 @@ git push origin main
 ## Лицензия
 
 MIT — см. `LICENSE.md`.
+
+## Импорт теста (JSON)
+
+В админ-панели (вкладка «Тесты») кнопка «Импорт JSON» создаёт новый тест и все вопросы из файла.
+
+Поддерживаемые формы: Shape 1 `{ "quiz": {...}, "questions": [...] }` и Shape 2 `{ title, questions: [...] }`. Типы вопросов: `single`, `multiple`, `text`. `multiple.correct_answer` можно передавать массивом или строкой `"[0,2]"`.
+
+Пример (Shape 1):
+
+```json
+{
+  "quiz": {
+    "title": "Основы Go",
+    "description": "Короткая проверка знаний",
+    "active": true,
+    "attempts_limit": 1,
+    "time_limit": 600,
+    "show_answers": true
+  },
+  "questions": [
+    { "text": "Как объявить переменную x типа int со значением 10?", "type": "single", "options": ["var x int = 10", "x := int(10)", "int x = 10", "let x = 10"], "correct_answer": 0 },
+    { "text": "Какие типы являются ссылочными в Go?", "type": "multiple", "options": ["slice", "map", "array", "channel", "int"], "correct_answer": [0, 1, 3] },
+    { "text": "Какое ключевое слово запускает горутину?", "type": "text", "correct_answer": "go" }
+  ]
+}
+```
