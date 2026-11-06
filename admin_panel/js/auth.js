@@ -42,6 +42,25 @@ function handleUnauthorized() {
     }
 }
 
+async function restoreSession() {
+    if (!isLoggedIn()) return;
+    const view = document.getElementById('auth-view');
+    const panel = document.getElementById('panel-view');
+    const btnLogout = document.getElementById('btn-logout');
+    if (view) view.style.display = 'none';
+    if (panel) panel.style.display = 'block';
+    if (btnLogout) btnLogout.style.display = 'inline-block';
+    if (window.app) {
+        try {
+            await window.app.init();
+            await window.app.showTab('quizzes');
+        } catch (err) {
+            if (err && err.message === 'Unauthorized') return;
+            console.error('Session restore failed:', err);
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('login-form');
     const err = document.getElementById('login-error');
@@ -74,6 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         logout();
     });
+
+    restoreSession();
 });
 
 window.auth = {

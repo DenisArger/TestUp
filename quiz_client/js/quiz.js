@@ -12,6 +12,7 @@ async function init(){
     questions = qRes.items || [];
     document.getElementById('quiz-title').textContent = quiz.title;
     document.getElementById('quiz-desc').textContent = quiz.description || '';
+    document.getElementById('name-label').textContent = 'Имя Фамилия';
     show('screen-name');
   } catch(e){ document.getElementById('screen-loading').textContent = e.message; }
 }

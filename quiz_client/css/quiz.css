@@ -11,3 +11,4 @@ input,textarea{width:100%;padding:.6rem;border:1px solid #ccc;border-radius:8px;
 .result-item{padding:.5rem;border-bottom:1px solid #eee}
 .correct{color:#16a34a}
 .wrong{color:#dc2626}
+#name-label{display:block;font-weight:600;margin-bottom:.4rem}
