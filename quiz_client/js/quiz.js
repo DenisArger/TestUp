@@ -36,6 +36,10 @@ document.getElementById('start-btn').addEventListener('click', async () => {
 function renderQuestion(){
   const q = questions[idx];
   const el = document.getElementById('question');
+  const progressEl = document.getElementById('progress');
+  if (progressEl) {
+    progressEl.textContent = `Вопрос ${idx + 1} из ${questions.length} • Пройдено: ${idx}, осталось: ${questions.length - idx - 1}`;
+  }
   let html = `<h2>${q.text}</h2>`;
   if (q.type === 'text') {
     html += `<textarea id="ans" rows="3">${answers[q.id]||''}</textarea>`;
