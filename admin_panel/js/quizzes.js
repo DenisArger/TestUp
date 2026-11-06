@@ -205,54 +205,86 @@ function validateQuizImport(data) {
     };
 
     const normalizedQs = [];
+    const skipped = [];
     (questionsIn || []).forEach((q, idx) => {
         const n = idx + 1;
-        if (!q || typeof q !== 'object' || Array.isArray(q)) { errors.push(`Вопрос ${n}: должен быть объектом`); return; }
+        const qErrors = [];
+        const log = (msg) => console.log(`[Import][Вопрос ${n}] ${msg}`);
+
+        if (!q || typeof q !== 'object' || Array.isArray(q)) {
+            errors.push(`Вопрос ${n}: должен быть объектом`);
+            log('ОШИБКА: вопрос не является объектом, пропущен');
+            skipped.push({ n, reason: 'не объект', raw: q });
+            return;
+        }
+        log(`Исходные данные: type=${JSON.stringify(q.type)}, options_count=${Array.isArray(q.options) ? q.options.length : 'нет options'}, correct_answer=${JSON.stringify(q.correct_answer)}`);
+
         const text = (q.text == null ? '' : String(q.text)).trim();
-        if (!text) errors.push(`Вопрос ${n}: отсутствует текст (text)`);
+        if (!text) { errors.push(`Вопрос ${n}: отсутствует текст (text)`); qErrors.push('отсутствует text'); log('ОШИБКА: нет текста'); }
         const type = String(q.type || '').trim();
-        if (!['single','multiple','text'].includes(type)) errors.push(`Вопрос ${n}: неверный тип (type)`);
+        if (!['single','multiple','text'].includes(type)) { errors.push(`Вопрос ${n}: неверный тип (type)`); qErrors.push(`неверный тип "${type}"`); log(`ОШИБКА: неверный тип "${type}"`); }
+
         let options = [];
         if (q.options !== undefined && q.options !== null) {
-            if (!Array.isArray(q.options)) errors.push(`Вопрос ${n}: options должен быть массивом`);
-            else options = q.options.map(o => (o == null ? '' : String(o).trim())).filter(o => o);
+            if (!Array.isArray(q.options)) { errors.push(`Вопрос ${n}: options должен быть массивом`); qErrors.push('options не массив'); log(`ОШИБКА: options не массив (${typeof q.options})`); }
+            else {
+                options = q.options.map((o, i) => {
+                    const s = (o == null ? '' : String(o).trim());
+                    if (!s) log(`ПРЕДУПРЕЖДЕНИЕ: вариант #${i} пустой, будет удалён`);
+                    return s;
+                }).filter(o => o);
+                log(`Распаршено ${options.length} непустых вариантов из ${q.options.length}`);
+            }
+        } else {
+            log('ПРЕДУПРЕЖДЕНИЕ: поле options отсутствует');
         }
+
         let correct_answer;
         if (type === 'single' || type === 'multiple') {
-            if (options.length === 0) errors.push(`Вопрос ${n}: нужны непустые варианты (options)`);
+            if (options.length === 0) { errors.push(`Вопрос ${n}: нужны непустые варианты (options)`); qErrors.push('нет вариантов'); log('ОШИБКА: нет вариантов для single/multiple'); }
         }
         if (type === 'single') {
             const ci = toNumIndex(q.correct_answer);
-            if (!Number.isInteger(ci) || ci < 0 || ci >= options.length) errors.push(`Вопрос ${n}: correct_answer вне диапазона`);
+            log(`single: correct_answer="${q.correct_answer}" -> индекс ${ci}, диапазон 0..${options.length - 1}`);
+            if (!Number.isInteger(ci) || ci < 0 || ci >= options.length) { errors.push(`Вопрос ${n}: correct_answer вне диапазона`); qErrors.push('correct_answer вне диапазона'); log(`ОШИБКА: индекс ${ci} вне диапазона 0..${options.length - 1}`); }
             else correct_answer = String(ci);
         } else if (type === 'multiple') {
             let arr = q.correct_answer;
             if (typeof arr === 'string') {
-                try { arr = JSON.parse(arr); } catch { errors.push(`Вопрос ${n}: correct_answer не JSON`); arr = null; }
+                log(`multiple: correct_answer строка "${arr}", пробуем JSON.parse`);
+                try { arr = JSON.parse(arr); } catch { errors.push(`Вопрос ${n}: correct_answer не JSON`); qErrors.push('correct_answer не JSON'); log('ОШИБКА: не удалось распарсить JSON'); arr = null; }
             }
-            if (!Array.isArray(arr)) { if (!errors.some(e=>e.startsWith(`Вопрос ${n}: correct_answer`))) errors.push(`Вопрос ${n}: correct_answer должен быть массивом`); }
+            if (!Array.isArray(arr)) { if (!errors.some(e=>e.startsWith(`Вопрос ${n}: correct_answer`))) errors.push(`Вопрос ${n}: correct_answer должен быть массивом`); qErrors.push('correct_answer не массив'); log(`ОШИБКА: correct_answer не массив (${typeof arr})`); }
             else {
                 const nums = arr.map(toNumIndex);
-                if (nums.some(x => !Number.isInteger(x) || x < 0 || x >= options.length)) errors.push(`Вопрос ${n}: correct_answer вне диапазона`);
-                if (arr.length === 0) errors.push(`Вопрос ${n}: выберите хотя бы один правильный вариант`);
-                if (new Set(nums).size !== nums.length) { /* allow dup? reject */ }
-                correct_answer = JSON.stringify(nums);
+                log(`multiple: исходный массив ${JSON.stringify(arr)} -> числа ${JSON.stringify(nums)}, диапазон 0..${options.length - 1}`);
+                if (nums.some(x => !Number.isInteger(x) || x < 0 || x >= options.length)) { errors.push(`Вопрос ${n}: correct_answer вне диапазона`); qErrors.push('correct_answer вне диапазона'); log(`ОШИБКА: правильные индексы вне диапазона`); }
+                if (arr.length === 0) { errors.push(`Вопрос ${n}: выберите хотя бы один правильный вариант`); qErrors.push('нет правильных вариантов'); log('ОШИБКА: пустой список правильных ответов'); }
+                if (!qErrors.some(e => e.includes('вне диапазона') || e.includes('нет правильных') || e.includes('не JSON') || e.includes('не массив'))) {
+                    correct_answer = JSON.stringify(nums);
+                    log(`УСПЕХ: multiple correct_answer=${correct_answer}`);
+                }
             }
         } else if (type === 'text') {
             const ca = (q.correct_answer == null ? '' : String(q.correct_answer)).trim();
-            if (!ca) errors.push(`Вопрос ${n}: отсутствует correct_answer`);
-            else correct_answer = ca;
+            log(`text: correct_answer="${ca}"`);
+            if (!ca) { errors.push(`Вопрос ${n}: отсутствует correct_answer`); qErrors.push('нет correct_answer'); log('ОШИБКА: нет правильного ответа'); }
+            else { correct_answer = ca; log(`УСПЕХ: text correct_answer="${correct_answer}"`); }
         }
-        if (text && type && !errors.some(e=>e.startsWith(`Вопрос ${n}:`))) {
+
+        if (text && type && qErrors.length === 0) {
             normalizedQs.push({ text, type, options: (type==='text' ? (options.length?options:[]) : options), correct_answer });
-        } else if (text && type && errors.some(e=>e.startsWith(`Вопрос ${n}:`))) {
-            // skip
+            log(`Вопрос добавлен в список на импорт`);
+        } else {
+            skipped.push({ n, reason: qErrors.join('; '), raw: q });
+            log(`Вопрос ПРОПУЩЕН по причинам: ${qErrors.join('; ')}`);
         }
     });
 
     // push normalized for questions without errors already? We push above only when no errors for that question.
     // But if some question had error, normalizedQs may be partial; still mark not ok.
     const ok = errors.length === 0;
+    console.log(`[Import][Валидация] Всего вопросов: ${(questionsIn || []).length}, валидных: ${normalizedQs.length}, пропущено: ${skipped.length}, ошибок: ${errors.length}`);
     return { ok, errors, quiz, questions: ok ? normalizedQs : normalizedQs };
 }
 
@@ -264,18 +296,24 @@ async function importQuizFromObject(data) {
         throw err;
     }
     const createdQuiz = await apiPost('/collections/quizzes/records', v.quiz);
+    console.log('[Import] Тест создан:', createdQuiz.id, createdQuiz.title);
     const total = v.questions.length;
     let createdCount = 0;
     const failed = [];
+    console.log(`[Import] Начинаем импорт ${total} вопросов...`);
     for (let i = 0; i < v.questions.length; i++) {
         const q = v.questions[i];
+        console.log(`[Import] Отправка вопроса #${i + 1}:`, JSON.stringify(q));
         try {
             await apiPost('/collections/questions/records', { quiz_id: createdQuiz.id, text: q.text, type: q.type, options: q.options, correct_answer: q.correct_answer });
             createdCount++;
+            console.log(`[Import] Вопрос #${i + 1} успешно создан`);
         } catch (e) {
+            console.error(`[Import] ОШИБКА при создании вопроса #${i + 1}:`, e.message || e, 'Данные:', JSON.stringify(q));
             failed.push({ index: i + 1, message: e.message || String(e) });
         }
     }
+    console.log(`[Import] Импорт завершён: ${createdCount}/${total} вопросов, ${failed.length} ошибок`);
     return { quiz: createdQuiz, total, createdCount, failed };
 }
 
@@ -289,6 +327,7 @@ async function handleImportFile(file) {
         let obj;
         try { obj = JSON.parse(text); } catch { throw new Error('Неверный JSON: не удалось разобрать файл'); }
         const res = await importQuizFromObject(obj);
+        console.log('[Import] РЕЗУЛЬТАТ:', JSON.stringify(res));
         if (res.failed.length === 0) {
             alert(`Импортирован тест «${res.quiz.title}»: ${res.createdCount} вопросов`);
         } else {

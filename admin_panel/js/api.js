@@ -31,7 +31,13 @@ async function apiRequest(url, options = {}) {
     const data = await res.json();
     console.log('[API DEBUG] Response data:', data);
     if (!res.ok) {
-        const msg = data && data.message ? data.message : `Ошибка ${res.status}`;
+        let msg = data && data.message ? data.message : `Ошибка ${res.status}`;
+        if (data && data.data && typeof data.data === 'object') {
+            const details = Object.entries(data.data)
+                .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join('; ') : v}`)
+                .join(' | ');
+            if (details) msg += ` [${details}]`;
+        }
         throw new Error(msg);
     }
     return data;
