@@ -60,7 +60,7 @@ async function updateQuiz(id, data) {
 }
 
 function shareQuiz(id) {
-    const url = `${location.origin}/quiz.html?id=${id}`;
+    const url = `${location.origin}/index.html?id=${id}`;
     if (navigator.clipboard) { navigator.clipboard.writeText(url); }
     prompt('Ссылка на тест (скопирована):', url);
 }
