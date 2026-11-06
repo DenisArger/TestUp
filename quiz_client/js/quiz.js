@@ -179,8 +179,26 @@ async function submit() {
 
 function showResult(score) {
   show("screen-result");
+  const pct = questions.length
+    ? Math.round((score / questions.length) * 100)
+    : 0;
   document.getElementById("score").textContent =
-    `${score} / ${questions.length} (${Math.round((score / questions.length) * 100)}%)`;
+    `${score} / ${questions.length} (${pct}%)`;
+  const msg = document.getElementById("result-message");
+  let text = "Каждый тест — шаг к новым знаниям.";
+  if (pct === 100)
+    text =
+      "Превосходно! Вы ответили верно на все вопросы — блестящий результат!";
+  else if (pct >= 80)
+    text = "Замечательно! Вы показали отличный уровень знаний — так держать!";
+  else if (pct >= 50)
+    text =
+      "Хороший результат! Вы на верном пути — ещё немного практики, и будет ещё лучше.";
+  else if (pct > 0)
+    text =
+      "Спасибо за прохождение! Не останавливайтесь — ошибки помогают учиться и становиться сильнее.";
+  msg.textContent = text;
+  msg.className = `result-message ${pct >= 80 ? "result-good" : pct >= 50 ? "result-mid" : "result-low"}`;
   const bd = document.getElementById("breakdown");
   bd.innerHTML = "";
   questions.forEach((q, i) => {
