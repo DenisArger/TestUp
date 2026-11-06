@@ -1,5 +1,5 @@
 # Версию PocketBase уточните на github.com/pocketbase/pocketbase/releases
-ARG PB_VERSION=0.24.3
+ARG PB_VERSION=0.40.6
 
 FROM python:3.11-slim
 
