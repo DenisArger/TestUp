@@ -3,7 +3,10 @@ const LOGIN_URL = '/admins/auth-with-password';
 let currentAdmin = null;
 
 async function login(email, password) {
+    const fullUrl = window.api.API_BASE + LOGIN_URL;
+    console.log('[AUTH DEBUG] Login URL:', fullUrl);
     const data = await apiPost(LOGIN_URL, { identity: email, password });
+    console.log('[AUTH DEBUG] Login response:', data);
     if (data.token) {
         localStorage.setItem('pb_token', data.token);
     }

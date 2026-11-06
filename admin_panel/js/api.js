@@ -1,8 +1,10 @@
 const API_BASE = '/api';
 
 async function apiRequest(url, options = {}) {
+    const fullUrl = `${API_BASE}${url}`;
+    console.log('[API DEBUG] Request:', options.method || 'GET', fullUrl);
     const token = localStorage.getItem('pb_token');
-    const res = await fetch(`${API_BASE}${url}`, {
+    const res = await fetch(fullUrl, {
         ...options,
         credentials: 'include',
         headers: {
@@ -18,13 +20,16 @@ async function apiRequest(url, options = {}) {
     }
 
     const contentType = res.headers.get('content-type') || '';
+    console.log('[API DEBUG] Response:', res.status, fullUrl);
     if (!contentType.includes('application/json')) {
         const text = await res.text();
+        console.log('[API DEBUG] Response body:', text);
         if (!res.ok) throw new Error(text || `Ошибка ${res.status}`);
         return text;
     }
 
     const data = await res.json();
+    console.log('[API DEBUG] Response data:', data);
     if (!res.ok) {
         const msg = data && data.message ? data.message : `Ошибка ${res.status}`;
         throw new Error(msg);
