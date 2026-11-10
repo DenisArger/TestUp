@@ -7,20 +7,31 @@ async function loadAttempts(quizId) {
     const filter = quizId ? `filter=quiz_id="${quizId}"` : '';
     const sort = '&sort=-created';
 
+    console.log('[ATTEMPTS DEBUG] Loading attempts, quizId:', quizId);
+
     while (true) {
         const url = `/collections/attempts/records?${filter}${sort}&page=${page}&perPage=${perPage}&expand=quiz_id`;
+        console.log('[ATTEMPTS DEBUG] Request page', page, ':', url);
         const res = await apiGet(url);
+        console.log('[ATTEMPTS DEBUG] Response page', page, ':', {
+            itemsCount: res.items?.length || 0,
+            totalPages: res.totalPages,
+            totalItems: res.totalItems,
+            page: res.page
+        });
         const items = res.items || [];
         allItems.push(...items);
 
         if (page >= res.totalPages || items.length === 0) break;
         page++;
     }
+    console.log('[ATTEMPTS DEBUG] Total loaded:', allItems.length);
     attempts = allItems;
     return attempts;
 }
 
 function renderAttempts() {
+    console.log('[ATTEMPTS DEBUG] Rendering attempts, count:', attempts.length);
     const tbody = document.getElementById('attempts-table-body');
     if (!tbody) return;
     tbody.innerHTML = '';
@@ -39,6 +50,7 @@ function renderAttempts() {
         `;
         tbody.appendChild(tr);
     }
+    console.log('[ATTEMPTS DEBUG] Rendered rows:', tbody.children.length);
 }
 
 function formatDate(iso) {
