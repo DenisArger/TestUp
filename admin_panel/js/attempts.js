@@ -10,15 +10,18 @@ async function loadAttempts(quizId) {
     console.log('[ATTEMPTS DEBUG] Loading attempts, quizId:', quizId);
 
     while (true) {
-        const url = `/collections/attempts/records?${filter}${sort}&page=${page}&perPage=${perPage}&expand=quiz_id`;
+        const url = `/collections/attempts/records?${filter}${sort}&page=${page}&perPage=${perPage}`;
         console.log('[ATTEMPTS DEBUG] Request page', page, ':', url);
         const res = await apiGet(url);
-        console.log('[ATTEMPTS DEBUG] Response page', page, ':', {
-            itemsCount: res.items?.length || 0,
-            totalPages: res.totalPages,
-            totalItems: res.totalItems,
-            page: res.page
-        });
+console.log('[ATTEMPTS DEBUG] Response page', page, ':', {
+        itemsCount: res.items?.length || 0,
+        totalPages: res.totalPages,
+        totalItems: res.totalItems,
+        page: res.page
+    });
+    if (page === 1 && res.items && res.items.length > 0) {
+        console.log('[ATTEMPTS DEBUG] First item structure:', JSON.stringify(res.items[0], null, 2));
+    }
         const items = res.items || [];
         allItems.push(...items);
 
