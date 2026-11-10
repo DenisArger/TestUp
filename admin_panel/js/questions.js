@@ -1,8 +1,20 @@
 let questions = [];
 
 async function loadQuestions(quizId) {
-    const res = await apiGet(`/collections/questions/records?filter=quiz_id="${quizId}"&sort=-created`);
-    questions = res.items || [];
+    let allItems = [];
+    let page = 1;
+    const perPage = 100;
+
+    while (true) {
+        const url = `/collections/questions/records?filter=quiz_id="${quizId}"&sort=-created&page=${page}&perPage=${perPage}`;
+        const res = await apiGet(url);
+        const items = res.items || [];
+        allItems.push(...items);
+
+        if (page >= res.totalPages || items.length === 0) break;
+        page++;
+    }
+    questions = allItems;
     return questions;
 }
 

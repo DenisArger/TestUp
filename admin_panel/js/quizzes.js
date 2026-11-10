@@ -1,8 +1,20 @@
 let quizzes = [];
 
 async function loadQuizzes() {
-    const res = await apiGet('/collections/quizzes/records?sort=-created');
-    quizzes = res.items || [];
+    let allItems = [];
+    let page = 1;
+    const perPage = 100;
+
+    while (true) {
+        const url = `/collections/quizzes/records?sort=-created&page=${page}&perPage=${perPage}`;
+        const res = await apiGet(url);
+        const items = res.items || [];
+        allItems.push(...items);
+
+        if (page >= res.totalPages || items.length === 0) break;
+        page++;
+    }
+    quizzes = allItems;
     return quizzes;
 }
 

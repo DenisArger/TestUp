@@ -1,11 +1,22 @@
 let attempts = [];
 
 async function loadAttempts(quizId) {
+    let allItems = [];
+    let page = 1;
+    const perPage = 100;
     const filter = quizId ? `filter=quiz_id="${quizId}"` : '';
-    const sort = filter ? '&sort=-created' : 'sort=-created';
-    const url = `/collections/attempts/records?${filter}${sort}`;
-    const res = await apiGet(url);
-    attempts = res.items || [];
+    const sort = '&sort=-created';
+
+    while (true) {
+        const url = `/collections/attempts/records?${filter}${sort}&page=${page}&perPage=${perPage}&expand=quiz_id`;
+        const res = await apiGet(url);
+        const items = res.items || [];
+        allItems.push(...items);
+
+        if (page >= res.totalPages || items.length === 0) break;
+        page++;
+    }
+    attempts = allItems;
     return attempts;
 }
 
