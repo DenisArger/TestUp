@@ -72,9 +72,11 @@ function escapeHtml(str) {
 }
 
 async function loadAttemptQuizSelect() {
+    console.log('[ATTEMPTS DEBUG] Loading quiz select');
     const select = document.getElementById('attempt-quiz-select');
     if (!select) return;
     const list = window.quizzes.getQuizzes ? window.quizzes.getQuizzes() : [];
+    console.log('[ATTEMPTS DEBUG] Available quizzes:', list.map(q => ({id: q.id, title: q.title})));
     select.innerHTML = '<option value="">Все тесты</option>';
     for (const q of list) {
         const opt = document.createElement('option');
